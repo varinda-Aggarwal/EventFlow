@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const registrationRoutes = require('./routes/registrationRoutes');
+const certificateRoutes = require('./routes/certificateRoutes');
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
