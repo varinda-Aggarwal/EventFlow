@@ -7,16 +7,25 @@ const {
   updateEvent,
   deleteEvent,
 } = require('../controllers/eventController');
+const { scanAttendance, getAttendanceList, lockAttendance } = require('../controllers/attendanceController');
+const { getEligibility, generateCertificates, downloadCertificate } = require('../controllers/certificateController');
 const { protect, authorize } = require('../middleware/authMiddleware');
-const { eventValidation } = require('../middleware/validators');
+const { eventValidation, updateEventValidation } = require('../middleware/validators');
 
-// All routes below require login AND organizer role
 router.use(protect, authorize('organizer'));
 
 router.post('/', eventValidation, createEvent);
 router.get('/my-events', getMyEvents);
 router.get('/:id', getEventById);
-router.put('/:id', eventValidation, updateEvent);
+router.put('/:id', updateEventValidation, updateEvent);
 router.delete('/:id', deleteEvent);
+
+router.post('/:eventId/attendance/scan', scanAttendance);
+router.get('/:eventId/attendance', getAttendanceList);
+router.patch('/:eventId/attendance/lock', lockAttendance);
+
+router.get('/:eventId/certificates/eligibility', getEligibility);
+router.post('/:eventId/certificates/generate', generateCertificates);
+router.get('/:eventId/certificates/:certificateId/download', downloadCertificate);
 
 module.exports = router;
