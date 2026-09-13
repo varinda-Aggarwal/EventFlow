@@ -69,6 +69,7 @@ const scanAttendance = async (req, res) => {
 const getAttendanceList = async (req, res) => {
   try {
     const { eventId } = req.params;
+    const { q } = req.query;
 
     const event = await Event.findById(eventId);
     if (!event) {
@@ -79,7 +80,16 @@ const getAttendanceList = async (req, res) => {
       return res.status(403).json({ message: 'You do not have access to this event' });
     }
 
-    const registrations = await Registration.find({ event: eventId }).select(
+    const filter = { event: eventId };
+    if (q) {
+      filter.$or = [
+        { name: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } },
+        { registrationId: { $regex: q, $options: 'i' } },
+      ];
+    }
+
+    const registrations = await Registration.find(filter).select(
       'name email registrationId attendance attendanceMarkedAt'
     );
 
