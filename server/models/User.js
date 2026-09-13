@@ -17,14 +17,18 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: 6,
-      select: false, // password kabhi bhi query result mein by default nahi aayega
+      select: false,
     },
     role: {
       type: String,
       enum: ['organizer', 'participant'],
       required: [true, 'Role is required'],
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
   },
   { timestamps: true }
@@ -32,7 +36,7 @@ const userSchema = new mongoose.Schema(
 
 // Save hone se pehle password ko hash karo
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+  if (!this.password || !this.isModified('password')) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
