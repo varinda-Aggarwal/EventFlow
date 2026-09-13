@@ -7,6 +7,11 @@ const registrationSchema = new mongoose.Schema(
       ref: 'Event',
       required: true,
     },
+    participant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     name: {
       type: String,
       required: [true, 'Name is required'],
