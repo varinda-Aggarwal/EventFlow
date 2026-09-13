@@ -38,23 +38,33 @@ const getMyEvents = async (req, res) => {
   }
 };
 
+const getAllEvents = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const filter = q ? { title: { $regex: q, $options: 'i' } } : {};
+
+    const events = await Event.find(filter).populate('organizer', 'name email').sort({ createdAt: -1 });
+    res.status(200).json({ events });
+  } catch (error) {
+    console.error('Get all events error:', error);
+    res.status(500).json({ message: 'Server error while fetching events' });
+  }
+};
+
 // @desc    Get a single event by ID (organizer's own event only)
 // @route   GET /api/events/:id
 // @access  Organizer only
 const getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate('organizer', 'name email');
 
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Object-level authorization: this organizer must own this event
-    if (event.organizer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'You do not have access to this event' });
-    }
+    const isOwner = event.organizer._id.toString() === req.user._id.toString();
 
-    res.status(200).json({ event });
+    res.status(200).json({ event, isOwner });
   } catch (error) {
     console.error('Get event error:', error);
     res.status(500).json({ message: 'Server error while fetching event' });
@@ -116,4 +126,4 @@ const deleteEvent = async (req, res) => {
   }
 };
 
-module.exports = { createEvent, getMyEvents, getEventById, updateEvent, deleteEvent };
+module.exports = { createEvent, getMyEvents, getAllEvents, getEventById, updateEvent, deleteEvent };
