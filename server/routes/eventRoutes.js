@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createEvent,
   getMyEvents,
+  getAllEvents,
   getEventById,
   updateEvent,
   deleteEvent,
@@ -11,11 +12,13 @@ const { scanAttendance, getAttendanceList, lockAttendance } = require('../contro
 const { getEligibility, generateCertificates, downloadCertificate } = require('../controllers/certificateController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { eventValidation, updateEventValidation } = require('../middleware/validators');
-
+const { getDashboard } = require('../controllers/dashboardController');
 router.use(protect, authorize('organizer'));
 
 router.post('/', eventValidation, createEvent);
 router.get('/my-events', getMyEvents);
+router.get('/all', getAllEvents);
+router.get('/dashboard', getDashboard);
 router.get('/:id', getEventById);
 router.put('/:id', updateEventValidation, updateEvent);
 router.delete('/:id', deleteEvent);
