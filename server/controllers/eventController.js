@@ -1,5 +1,5 @@
 const Event = require('../models/Event');
-
+const logActivity = require('../utils/logActivity');
 // @desc    Create a new event
 // @route   POST /api/events
 // @access  Organizer only
@@ -17,7 +17,12 @@ const createEvent = async (req, res) => {
       maxParticipants,
       organizer: req.user._id, // taken from the logged-in user, never trust a value sent by the client
     });
-
+    await logActivity({
+      organizer: req.user._id,
+      event: event._id,
+      type: 'event_created',
+      message: `You created ${event.title}.`, 
+    });
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error) {
     console.error('Create event error:', error);
@@ -94,7 +99,12 @@ const updateEvent = async (req, res) => {
     });
 
     await event.save();
-
+    await logActivity({
+      organizer: req.user._id,
+      event: event._id,
+      type: 'event_updated',
+      message: `You updated ${event.title}.`,
+    });
     res.status(200).json({ message: 'Event updated successfully', event });
   } catch (error) {
     console.error('Update event error:', error);
