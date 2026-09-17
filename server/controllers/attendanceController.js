@@ -1,5 +1,6 @@
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
+const logActivity = require('../utils/logActivity');
 
 // @desc    Scan QR and mark attendance
 // @route   POST /api/events/:eventId/attendance/scan
@@ -50,6 +51,13 @@ const scanAttendance = async (req, res) => {
     registration.attendance = 'present';
     registration.attendanceMarkedAt = new Date();
     await registration.save();
+
+    await logActivity({
+      organizer: event.organizer,
+      event: event._id,
+      type: 'attendance_marked',
+      message: `Attendance was marked for ${registration.name} in ${event.title}.`,
+    });
 
     res.status(200).json({
       message: 'Attendance marked successfully',
