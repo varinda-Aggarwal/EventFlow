@@ -4,6 +4,7 @@ const Registration = require('../models/Registration');
 const { generateRegistrationId, generateQrToken } = require('../utils/idGenerator');
 const Certificate = require('../models/Certificate');
 const generateCertificatePDF = require('../utils/certificateGenerator');
+const logActivity = require('../utils/logActivity');
 
 const browseEvents = async (req, res) => {
   try {
@@ -89,6 +90,13 @@ const registrationId = generateRegistrationId(globalCount + 1);
       year,
       registrationId,
       qrToken,
+    });
+
+    await logActivity({
+      organizer: event.organizer,
+      event: event._id,
+      type: 'registration',
+      message: `A participant registered for ${event.title}.`,  
     });
 
     const qrCodeDataUrl = await QRCode.toDataURL(qrToken);
