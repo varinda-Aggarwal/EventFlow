@@ -3,6 +3,7 @@ const Registration = require('../models/Registration');
 const Certificate = require('../models/Certificate');
 const { generateCertificateId } = require('../utils/idGenerator');
 const generateCertificatePDF = require('../utils/certificateGenerator');
+const logActivity = require('../utils/logActivity');
 
 // @desc    Get certificate eligibility summary before generating
 // @route   GET /api/events/:eventId/certificates/eligibility
@@ -87,6 +88,15 @@ const generateCertificates = async (req, res) => {
       });
 
       generatedCount++;
+    }
+
+    if (generatedCount > 0) {
+      await logActivity({
+        organizer: event.organizer,
+        event: event._id,
+        type: 'certificates_generated',
+        message: `${generatedCount} certificate(s) generated for ${event.title}.`,
+      });
     }
 
     res.status(201).json({
